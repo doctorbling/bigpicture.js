@@ -1,0 +1,22 @@
+{
+  "name": "bigpicture",
+  "version": "1.0.0",
+  "description": "bigpicture.js =============",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.18.1"
+  },
+  "scripts": {
+    "start": "node ./app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doctorbling/bigpicture.js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/doctorbling/bigpicture.js/issues"
+  },
+  "homepage": "https://github.com/doctorbling/bigpicture.js#readme"
+}
