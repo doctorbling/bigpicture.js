@@ -348,6 +348,7 @@ var bigpicture = (function() {
   return { newText: newText, 
            newSvg: newSvg, 
            current: current, 
+           onZoom: onZoom,
            updateTextPosition: updateTextPosition };
 
 })();
