@@ -30,7 +30,6 @@ var bigpicture = (function() {
   current.x = params.x ? parseFloat(params.x) : $(bp).data('x');
   current.y = params.y ? parseFloat(params.y) : $(bp).data('y');
   current.zoom = params.zoom ? parseFloat(params.zoom) : $(bp).data('zoom');
-  console.debug("current: " + JSON.stringify(current));
 
   bp.x = 0; bp.y = 0;
   bp.updateContainerPosition = function() { 
@@ -47,6 +46,7 @@ var bigpicture = (function() {
    */
 
   $(".text").each(function() { updateTextPosition(this); });     // initialization
+  $(".svg").each(function() { updateSvgPosition(this); });     // initialization
 
   $(bp).on('blur', '.text', function() { if ($(this).text().replace(/^\s+|\s+$/g, '') === '') { $(this).remove(); } });
 
@@ -54,6 +54,15 @@ var bigpicture = (function() {
 
   function updateTextPosition(e) {
     e.style.fontSize = $(e).data("size") / current.zoom + 'px';
+    e.style.left = ($(e).data("x") - current.x) / current.zoom - bp.x + 'px';
+    e.style.top = ($(e).data("y") - current.y) / current.zoom - bp.y + 'px';
+  }
+
+
+  function updateSvgPosition(e) {
+    var j = ($(e).data("size") / current.zoom)/20;
+    e.style.transformOrigin = "top left";
+    e.style.transform = "scale(" + j  + ")";
     e.style.left = ($(e).data("x") - current.x) / current.zoom - bp.x + 'px';
     e.style.top = ($(e).data("y") - current.y) / current.zoom - bp.y + 'px';
   }
@@ -70,9 +79,37 @@ var bigpicture = (function() {
     return tb;
   }
 
+  function newSvg(x, y, size, svgMarkup) {
+    console.log(x, y, size, svgMarkup);
+    var svgElement = document.createElement('div');
+    svgElement.className = "svg";
+    svgElement.contentEditable = true;
+    svgElement.innerHTML = svgMarkup;
+    svgElement.style.transformOrigin = "center";
+    $(svgElement).data("x", x).data("y", y).data("size", size);
+    updateSvgPosition(svgElement);
+    bp.appendChild(svgElement);
+    return svgElement;
+  }
+
   bpContainer.onclick = function(e) {
     if (isContainedByClass(e.target, 'text')) { return; }
-    newText(current.x + (e.clientX) * current.zoom, current.y + (e.clientY) * current.zoom, 20 * current.zoom, '').focus();
+    if (isContainedByClass(e.target, 'svg')) { return; }
+
+    // Eg set newSvgMarkup in browser console like this:
+    //  bigpicture.current.newSvgMarkup = 
+    //    `<svg xmlns="http://www.w3.org/2000/svg"
+    //         width="102" height="22">
+    //        <rect x="0" y="0" width="100" height="20"
+    //          style="fill:#ff0000; stroke:#000000;stroke-width:1px;" /> 
+    //    </svg>`
+
+    if (current.newSvgMarkup === undefined) {
+      newText(current.x + (e.clientX) * current.zoom, current.y + (e.clientY) * current.zoom, 20 * current.zoom, '').focus();
+    }
+    else {
+      newSvg(current.x + (e.clientX) * current.zoom, current.y + (e.clientY) * current.zoom, 20 * current.zoom, current.newSvgMarkup).focus();
+    }
   };
 
   /*
@@ -152,6 +189,7 @@ var bigpicture = (function() {
     console.debug("current: " + JSON.stringify(current));
 
     $(".text").each(function() { updateTextPosition(this); });
+    $(".svg").each(function() { updateSvgPosition(this); });
 
     biggestPictureSeen = false;
   }
@@ -308,6 +346,7 @@ var bigpicture = (function() {
    */
 
   return { newText: newText, 
+           newSvg: newSvg, 
            current: current, 
            updateTextPosition: updateTextPosition };
 
