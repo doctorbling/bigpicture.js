@@ -30,9 +30,17 @@ var bigpicture = (function() {
   current.x = params.x ? parseFloat(params.x) : $(bp).data('x');
   current.y = params.y ? parseFloat(params.y) : $(bp).data('y');
   current.zoom = params.zoom ? parseFloat(params.zoom) : $(bp).data('zoom');
+  console.debug("current: " + JSON.stringify(current));
 
   bp.x = 0; bp.y = 0;
-  bp.updateContainerPosition = function() { bp.style.left = bp.x + 'px'; bp.style.top = bp.y + 'px'; };
+  bp.updateContainerPosition = function() { 
+    // This moves the "bigpicture" div.  It changes no positional attributes (left, top) of child elements 
+    //  but they move onscreen along with parent nonetheless.  That is, their coordinates are relative to parent.
+    // The bigpicture div seems to have 0 width and length -- according to Firefox DOM inspector -- even though
+    //  it contains children.
+    console.debug("bp.x: " + bp.x + "  bp.y: " + bp.y);
+    bp.style.left = bp.x + 'px'; bp.style.top = bp.y + 'px'; 
+  };
 
   /*
    * TEXT BOXES
@@ -51,6 +59,7 @@ var bigpicture = (function() {
   }
 
   function newText(x, y, size, text) {
+    console.log(x, y, size, text);
     var tb = document.createElement('div');
     tb.className = "text";
     tb.contentEditable = true;
@@ -105,6 +114,7 @@ var bigpicture = (function() {
       bp.updateContainerPosition();
       current.x -= (e.pageX - previousMousePosition.x) * current.zoom;
       current.y -= (e.pageY - previousMousePosition.y) * current.zoom;
+      console.debug("current: " + JSON.stringify(current));
       previousMousePosition = { x: e.pageX, y: e.pageY };
     }
     if (movingText) {
@@ -128,6 +138,7 @@ var bigpicture = (function() {
     previous;
 
   function onZoom(zoom, wx, wy, sx, sy) {  // zoom on (wx, wy) (world coordinates) which will be placed on (sx, sy) (screen coordinates)
+    console.debug(zoom, wx, wy, sx, sy);
     wx = (typeof wx === "undefined") ? current.x + window.innerWidth / 2 * current.zoom : wx;
     wy = (typeof wy === "undefined") ? current.y + window.innerHeight / 2 * current.zoom : wy;
     sx = (typeof sx === "undefined") ? window.innerWidth / 2  : sx;
@@ -138,6 +149,7 @@ var bigpicture = (function() {
     bp.x = 0; bp.y = 0;
     bp.updateContainerPosition();
     current.x = wx - sx * zoom; current.y = wy - sy * zoom; current.zoom = zoom;
+    console.debug("current: " + JSON.stringify(current));
 
     $(".text").each(function() { updateTextPosition(this); });
 
@@ -240,6 +252,7 @@ var bigpicture = (function() {
     mousewheel = function(e) {
       e.preventDefault();
       var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+      console.debug("MWHEEL  e.clientX: " + e.clientX + "  e.clientY: " + e.clientY + "  delta: " + delta);
       onZoom((delta > 0) ? current.zoom / 1.7 : current.zoom * 1.7, current.x + e.clientX * current.zoom, current.y + e.clientY * current.zoom, e.clientX, e.clientY);
     };
   }
